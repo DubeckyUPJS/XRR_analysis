@@ -77,3 +77,4 @@ def find_noise_floor_cutoff(q, R, tail_fraction=0.05, n_sigma=5, min_run=3):
         return int(valid_starts[-1] + min_run - 1)   # right edge of the last fully-signal run
     return len(q) - 1
 
+

@@ -58,3 +58,22 @@ def find_critical_edge(q, R):
     idx = int(np.argmin(dlogR_dq))
     return idx, dlogR_dq
 
+def find_noise_floor_cutoff(q, R, tail_fraction=0.05, n_sigma=5, min_run=3):
+    n_tail = max(10, int(len(R) * tail_fraction))
+    tail = R[-n_tail:]
+
+    med = np.median(tail)
+    mad = np.median(np.abs(tail - med))
+    sigma = 1.4826 * mad
+    threshold = med + n_sigma * sigma
+
+    above = (R > threshold).astype(int)
+
+    # window_sum[j] = number of True values in above[j : j+min_run]
+    window_sum = np.convolve(above, np.ones(min_run, dtype=int), mode='valid')
+    valid_starts = np.where(window_sum == min_run)[0]   # windows that are fully above threshold
+
+    if len(valid_starts):
+        return int(valid_starts[-1] + min_run - 1)   # right edge of the last fully-signal run
+    return len(q) - 1
+
